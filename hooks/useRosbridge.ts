@@ -2,7 +2,6 @@ import { useEffect, useState, useMemo } from "react";
 import ROSLIB, { Message, Ros, Topic } from "roslib";
 
 const useRosbridge = (url: string) => {
-    const [message, setMessage] = useState<string>("");
     const [connected, setConnected] = useState<boolean>(false);
     const [detectedImage, setDetectedImage] = useState<string>("");
     const [rosPublish, setRosPublish] = useState<Topic<Message>>();
@@ -11,18 +10,17 @@ const useRosbridge = (url: string) => {
 
     useEffect(() => {
         ros.on("connection", () => {
-            setMessage("Connected to ROS");
+            console.log("Connected to ROS");
             setConnected(true);
         });
 
         ros.on("error", (error: any) => {
             console.error("Error connecting to ROS:", error);
-            setMessage("Error connecting to ROS: " + error);
             setConnected(false);
         });
 
         ros.on("close", () => {
-            setMessage("Disconnected from ROS");
+            console.log("Disconnected from ROS");
             setConnected(false);
         });
 
@@ -57,7 +55,7 @@ const useRosbridge = (url: string) => {
         };
     }, [ros]);
 
-    return { message, connected, detectedImage, rosPublish };
+    return { connected, detectedImage, rosPublish };
 };
 
 export default useRosbridge;
