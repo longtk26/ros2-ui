@@ -4,6 +4,7 @@ import ROSLIB, { Message, Ros, Topic } from "roslib";
 const useRosbridge = (url: string) => {
     const [connected, setConnected] = useState<boolean>(false);
     const [detectedImage, setDetectedImage] = useState<string>("");
+    const [dataSTM32, setDataSTMM32] = useState<string>("");
     const [rosPublish, setRosPublish] = useState<Topic<Message>>();
 
     const ros = useMemo(() => new Ros({ url }), [url]);
@@ -36,6 +37,12 @@ const useRosbridge = (url: string) => {
             messageType: "sensor_msgs/CompressedImage",
         });
 
+        const stm32_listener = new ROSLIB.Topic({
+            ros: ros,
+            name: "/stm32_topic",
+            messageType: "std_msgs/String",
+        });
+
         const publisher = new ROSLIB.Topic({
             ros: ros,
             name: "/ui_control",
@@ -50,12 +57,17 @@ const useRosbridge = (url: string) => {
             setDetectedImage(message.data);
         });
 
+        stm32_listener.subscribe((message: any) => {
+            setDataSTMM32(message.data);
+        });
+
         return () => {
             image_listener.unsubscribe();
+            stm32_listener.unsubscribe();
         };
     }, [ros]);
 
-    return { connected, detectedImage, rosPublish };
+    return { connected, detectedImage, dataSTM32, rosPublish };
 };
 
 export default useRosbridge;

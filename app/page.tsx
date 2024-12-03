@@ -6,7 +6,7 @@ import Image from "next/image";
 import ROSLIB from "roslib";
 
 export default function Home() {
-    const { detectedImage, rosPublish } = useRosContext();
+    const { detectedImage, rosPublish, dataSTM32 } = useRosContext();
     const handleOnclick = () => {
         const message = new ROSLIB.Message({ data: "start_follow" });
         rosPublish?.publish(message);
@@ -30,6 +30,10 @@ export default function Home() {
                 <Button className="mt-6" onClick={() => handleOnclick()}>
                     Detect and follow
                 </Button>
+            </section>
+            <section className="mt-6">
+                <h1 className="text-2xl font-bold">Data from STM32:</h1>
+                <p>{dataSTM32}</p>
             </section>
         </main>
     );
