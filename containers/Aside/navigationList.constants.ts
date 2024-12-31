@@ -10,5 +10,9 @@ export const navigationList: {
             name: "Settings",
             path: "/settings",
         },
+        {
+            name: "Charts",
+            path: "/charts",
+        }
     ],
 };

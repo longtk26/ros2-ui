@@ -35,8 +35,6 @@ export const useRosContext = () => {
     throw new Error("useRosContext must be used within a RosProvider");
   } 
 
-  console.log("Context::: ", context);
-
   return context;
 };
 
