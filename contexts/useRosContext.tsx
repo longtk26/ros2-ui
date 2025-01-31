@@ -11,7 +11,7 @@ const RosContext = createContext<RosContextType>(
 //  246.2576687116565 FOCAL LENGTH
 const RosProvider = ({ children }: { children: React.ReactElement }) => {
     const { connected, detectedImage, rosPublish, dataSTM32 } = useRosbridge(
-        "ws://localhost:9091"
+        "ws://192.168.168.171:9091"
     );
 
     return (
