@@ -1,6 +1,5 @@
 "use client";
 
-import MapLeafLet from "@/components/maps/MapLeafLet";
 import { Button } from "@/components/ui/button";
 import { useRosContext } from "@/contexts/useRosContext";
 import Image from "next/image";
