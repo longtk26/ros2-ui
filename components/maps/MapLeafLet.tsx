@@ -44,7 +44,7 @@ const MapLeafLet = () => {
             // Convert to coords map
             const latOnMap = convertToCoordsMap(parseFloat(lat));
             const lngOnMap = convertToCoordsMap(parseFloat(lng));
-
+            console.log("MODE::: ", mode);
             // Mode GPS = 2
             if (mode !== "2") return;
 

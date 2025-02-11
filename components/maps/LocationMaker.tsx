@@ -1,13 +1,15 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Marker, Popup, useMapEvents } from "react-leaflet"
-import icon from 'leaflet/dist/images/marker-icon.png';
-import iconShadow from 'leaflet/dist/images/marker-shadow.png';
-import L from 'leaflet';
+import { useEffect, useState } from "react";
+import { Marker, Popup, useMapEvents } from "react-leaflet";
+import icon from "leaflet/dist/images/marker-icon.png";
+import iconShadow from "leaflet/dist/images/marker-shadow.png";
+import L from "leaflet";
 import { convertToCoordsMap } from "@/util";
+import { useRosContext } from "@/contexts/useRosContext";
+import ROSLIB from "roslib";
 
-let DefaultIcon = L.icon({
+const DefaultIcon = L.icon({
     iconUrl: icon as any,
     shadowUrl: iconShadow as any,
 });
@@ -15,35 +17,50 @@ let DefaultIcon = L.icon({
 L.Marker.prototype.options.icon = DefaultIcon;
 
 const LocationMaker = () => {
-  const [position, setPosition] = useState<L.LatLng | null>(null);
-  const map = useMapEvents({});
+    const [position, setPosition] = useState<L.LatLng | null>(null);
+    const { dataSTM32, rosPublish } = useRosContext(); // STM32 data: s:3:2:lat:long:e
+    const map = useMapEvents({});
 
-  const flyToFixedLocation = () => {
-      const lastReceived = 1058.61276
-      const lat = convertToCoordsMap(lastReceived);
-      const longReceived = 10640.44881;
-      const long = convertToCoordsMap(longReceived);
-      console.log(lat, long);
+    const flyToFixedLocation = () => {
+        const lastReceived = parseFloat(dataSTM32.split(":")[3]);
+        const lat = convertToCoordsMap(lastReceived);
+        const longReceived = parseFloat(dataSTM32.split(":")[4]);
+        const long = convertToCoordsMap(longReceived);
+        console.log(lat, long);
 
-      const fixedCoordinates = [lat, long] as L.LatLngTuple; 
-      setPosition(new L.LatLng(...fixedCoordinates));
-      map.flyTo(fixedCoordinates, 20);
-  };
+        const fixedCoordinates = [lat, long] as L.LatLngTuple;
+        setPosition(new L.LatLng(...fixedCoordinates));
+        map.flyTo(fixedCoordinates, 20);
+    };
 
-  return (
-      <>
-          <button onClick={flyToFixedLocation} style={{ position: "absolute", bottom: 2, left: 10, zIndex: 1000 }}
-            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-              Find me
-          </button>
-          {position && (
-              <Marker position={position}>
-                  <Popup>You are here</Popup>
-              </Marker>
-          )}
-      </>
-  );
+    useEffect(() => {
+        const message = new ROSLIB.Message({
+            data: "[serial] find-me",
+        });
+        rosPublish.publish(message);
+    }, [])
+
+    return (
+        <>
+            <button
+                onClick={flyToFixedLocation}
+                style={{
+                    position: "absolute",
+                    bottom: 2,
+                    left: 10,
+                    zIndex: 1000,
+                }}
+                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+            >
+                Find me
+            </button>
+            {position && (
+                <Marker position={position}>
+                    <Popup>You are here</Popup>
+                </Marker>
+            )}
+        </>
+    );
 };
 
-
-export default LocationMaker
+export default LocationMaker;
