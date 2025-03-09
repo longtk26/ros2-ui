@@ -63,7 +63,7 @@ const MapLeafLet = () => {
                 point.lng,
             ]);
             if (latlngs.length !== 4) return;
-
+            
             const points: number[][] = [];
             const distanceBetweenCoords = 0.5 / 111320;
             for (let i = 0; i < 4; i++) {
@@ -76,33 +76,38 @@ const MapLeafLet = () => {
                 );
             }
 
-            for (let i = 0; i < points.length; i++) {
-                const message = new ROSLIB.Message({
-                    data: `[serial] s:2:2:${points[i][0]}:${points[i][1]}:e`,
-                });
-                rosPublish?.publish(message);
-                console.log(
-                    `Published message ${i}: [serial] s:2:2:${points[i][0]}:${points[i][1]}:e`
-                );
-            }
+            
+            const message = new ROSLIB.Message({
+                data: `[serial] ${points.length}-${points}`,
+            })
+            console.log(`rectangle [serial] ${points.length}-${points}`);
+            rosPublish?.publish(message);
+            console.log('number of points sent:::::', points.length);
+            
         } else {
             const listCoordinates = e.layer._latlngs.map((item: any) => [
                 item.lat,
                 item.lng,
             ]);
-            // const message = new ROSLIB.Message({
-            //     data: `[serial] s:2:2:${e.latlng.lat}:${e.latlng.lng}:e`
-            // });
-            // rosPublish?.publish(message);
-            for (let i = 0; i < listCoordinates.length; i++) {
-                const message = new ROSLIB.Message({
-                    data: `[serial] s:2:2:${listCoordinates[i][0]}:${listCoordinates[i][1]}:e`,
-                });
-                // rosPublish?.publish(message);
-                console.log(
-                    `message ${i}: [serial] s:2:2:${listCoordinates[i][0]}:${listCoordinates[i][1]}:e`
+
+            const points: number[][] = [];
+            const distanceBetweenCoords = (0.5) / 111320;
+            for (let i = 0; i < listCoordinates.length - 1; i++) {
+                points.push(
+                    ...interpolatePoints(
+                        listCoordinates[i],
+                        listCoordinates[i + 1],
+                        distanceBetweenCoords
+                    )
                 );
             }
+
+            const message = new ROSLIB.Message({
+                data: `[serial] ${points.length}-${points}`,
+            });
+            console.log(`polyline [serial] ${points.length}-${points}`);
+
+            rosPublish?.publish(message);
         }
     };
 
@@ -111,7 +116,7 @@ const MapLeafLet = () => {
     return (
         <div className="h-[500px] w-full">
             <MapContainer
-                center={[10.9768793, 106.6741468]}
+                center={[10.882130166666665, 106.80544716666667]}
                 zoom={15}
                 scrollWheelZoom={true}
                 className="h-full w-full"
