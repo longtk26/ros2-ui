@@ -1,91 +1,91 @@
 "use client";
 
+import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
+
 import {
-    Chart as ChartJS,
-    CategoryScale,
-    LinearScale,
-    PointElement,
-    LineElement,
-    Title,
-    Tooltip,
-    Legend,
-    Filler,
-} from "chart.js";
-import { Line } from "react-chartjs-2";
-import { useRosContext } from "@/contexts/useRosContext";
-import { useEffect, useState } from "react";
+    Card,
+    CardContent,
+    CardHeader,
+} from "@/components/ui/card";
+import {
+    ChartConfig,
+    ChartContainer,
+    ChartTooltip,
+    ChartTooltipContent,
+} from "@/components/ui/chart";
+const chartDataActual = [
+    { x: 4, y: 186 },
+    { x: 3, y: 200 },
+    { x: 5, y: 237 },
+    { x: 6, y: 73 },
+    { x: 7, y: 209 },
+    { x: 8, y: 214 },
+];
 
-ChartJS.register(
-    CategoryScale,
-    LineElement,
-    LinearScale,
-    PointElement,
-    Title,
-    Tooltip,
-    Legend,
-    Filler
-);
+const chartDataCurrent = [
+    {actual: 3, current: 186},
+];
 
-const LineChart = () => {
-    // frame data stm32: s:1:2:<angle_value>:<velocity_value>:e
-    const { dataSTM32 } = useRosContext();
-    const dataSplitFromSTM32 = dataSTM32.split(":");
-    const [velocityValues, setVelocityValues] = useState(new Array(1000).fill(0));
-    const [timeLabels, setTimeLabels] = useState(
-        Array.from({ length: 1000 }, () => new Date().toLocaleTimeString()) // Initialize with current time
-    );
+const chartConfig = {
+    actual: {
+        label: "Actual",
+        color: "hsl(var(--chart-1))",
+    },
+    current: {
+        label: "Current",
+        color: "hsl(var(--chart-2))",
+    },
+} satisfies ChartConfig;
 
-    useEffect(() => {
-        if (dataSplitFromSTM32.length === 5) {
-            const newVelocity = parseFloat(dataSplitFromSTM32[4]); // Extract velocity
-            const tempVelocity = velocityValues.slice(1); // Shift out the first value
-            const tempTime = timeLabels.slice(1); // Shift out the first time label
-
-            tempVelocity.push(newVelocity); // Add new velocity
-            tempTime.push(new Date().toLocaleTimeString()); // Add current time
-
-            setVelocityValues([...tempVelocity]);
-            setTimeLabels([...tempTime]);
-        }
-    }, [dataSTM32]);
-
-    const data = {
-        labels: timeLabels, // Use real-time labels
-        datasets: [
-            {
-                label: "Velocity (m/s)",
-                data: velocityValues,
-                fill: false,
-                borderColor: "rgb(75, 192, 192)",
-                tension: 0.1,
-            },
-        ],
-    };
-
-    const options = {
-        scales: {
-            y: {
-                title: {
-                    display: true,
-                    text: "Velocity (m/s)",
-                },
-                min: 0,
-                max: 4,
-            },
-            x: {
-                title: {
-                    display: true,
-                    text: "Time (HH:MM:SS)", // Updated to show real-time format
-                },
-            },
-        },
-    };
-
+export function LineChartRos() {
     return (
-        <div className="right-8 top-20 fixed" style={{ width: "1000px", margin: "0 auto" }}>
-            <Line data={data} options={options} />
-        </div>
-    );
-};
+        <section className="w-[300px] mt-2">
+            <Card>
+                <CardHeader>
+                </CardHeader>
+                <CardContent>
+                    <ChartContainer config={chartConfig}>
+                        <LineChart
+                            accessibilityLayer
+                            data={chartDataActual}
+                            margin={{
+                                left: 12,
+                                right: 12,
+                            }}
+                        >
+                            <CartesianGrid vertical={false} />
+                            <XAxis
+                                dataKey="x"
+                                tickLine={false}
+                                axisLine={false}
+                                tickMargin={8}
+                            />
+                            <YAxis 
+                                tickLine={false}
+                                axisLine={false}
+                                tickMargin={8}
+                            />
+                            <ChartTooltip
+                                cursor={false}
+                                content={<ChartTooltipContent hideLabel />}
+                            />
+                            <Line
+                                dataKey="actual"
+                                type="natural"
+                                stroke="var(--color-actual)"
+                                strokeWidth={2}
+                                dot={{
+                                    fill: "var(--color-actual)",
+                                }}
+                                activeDot={{
+                                    r: 6,
+                                }}
+                            />
+                        </LineChart>
 
-export default LineChart;
+                    </ChartContainer>
+                </CardContent>
+            </Card>
+        </section>
+    );
+}

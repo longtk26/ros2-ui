@@ -30,7 +30,9 @@ const LocationMaker = () => {
 
         const fixedCoordinates = [lat, long] as L.LatLngTuple;
         setPosition(new L.LatLng(...fixedCoordinates));
+        // setPosition(new L.LatLng(10.881989833333334, 106.80560283333334));
         map.flyTo(fixedCoordinates, 20);
+        // map.flyTo([10.881989833333334, 106.80560283333334], 30);
     };
 
     useEffect(() => {

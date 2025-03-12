@@ -78,9 +78,9 @@ const MapLeafLet = () => {
 
             
             const message = new ROSLIB.Message({
-                data: `[serial] ${points.length}-${points}`,
+                data: `[standley_node] ${points.length}-${points}`,
             })
-            console.log(`rectangle [serial] ${points.length}-${points}`);
+            console.log(`rectangle [standley_node] ${points.length}-${points}`);
             rosPublish?.publish(message);
             console.log('number of points sent:::::', points.length);
             
@@ -103,18 +103,22 @@ const MapLeafLet = () => {
             }
 
             const message = new ROSLIB.Message({
-                data: `[serial] ${points.length}-${points}`,
+                data: `[standley_node] ${points.length}-${points}`,
             });
-            console.log(`polyline [serial] ${points.length}-${points}`);
+            const messageSerial = new ROSLIB.Message({
+                data: `[serial] request-imu`,
+            });
+            console.log(`polyline [standley_node] ${points.length}-${points}`);
 
             rosPublish?.publish(message);
+            rosPublish?.publish(messageSerial);
         }
     };
 
     if (!mounted) return <p>Loading map...</p>;
 
     return (
-        <div className="h-[500px] w-full">
+        <div className="h-[450px] w-full">
             <MapContainer
                 center={[10.882130166666665, 106.80544716666667]}
                 zoom={15}

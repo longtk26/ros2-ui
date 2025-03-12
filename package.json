@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@radix-ui/react-slot": "^1.1.0",
+    "@react-google-maps/api": "^2.20.6",
     "chart.js": "^4.4.7",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
@@ -22,6 +23,7 @@
     "react-dom": "^19.0.0-rc.1",
     "react-leaflet": "^5.0.0-rc.2",
     "react-leaflet-draw": "^0.20.4",
+    "recharts": "^2.15.1",
     "roslib": "^1.4.1",
     "tailwind-merge": "^2.5.4",
     "tailwindcss-animate": "^1.0.7",

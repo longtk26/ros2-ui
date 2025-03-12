@@ -11,7 +11,7 @@ const Header = () => {
                     width={50}
                     height={50}
                 />
-                <h1 className="text-2xl text-white font-bold">ĐỒ ÁN 2</h1>
+                <h1 className="text-2xl text-white font-bold">LUẬN VĂN TỐT NGHIỆP</h1>
             </nav>
         </header>
     );
