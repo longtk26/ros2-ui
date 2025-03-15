@@ -56,10 +56,9 @@ const SavePointsMap = ({ points, onSetCoordinatesSaved }: { points: number[][], 
                     const content = e.target.result as string;
                     console.log("Loaded Points (Raw):", content);
         
-                    // Chuyển chuỗi thành mảng các mảng
                     const loadedPoints = content
-                        .trim() // Xóa khoảng trắng đầu/cuối
-                        .split(",") // Tách từng giá trị theo dấu phẩy
+                        .trim() 
+                        .split(",") 
                         .map((v, i, arr) => (i % 2 === 0 ? [parseFloat(v), parseFloat(arr[i + 1])] : null))
                         .filter((point) => point !== null) as number[][];
         
@@ -75,9 +74,8 @@ const SavePointsMap = ({ points, onSetCoordinatesSaved }: { points: number[][], 
     return (
         <form
             onSubmit={handleSaveAndGetMap}
-            className="w-[150px] p-2 rounded-lg bg-white fixed right-1 bottom-[31%] z-[1000] flex flex-col"
+            className="w-[150px] p-2 rounded-lg bg-white fixed right-1 bottom-[36%] z-[1000] flex flex-col"
         >
-            <h3 className="font-bold text-[14px] text-center">Choose type</h3>
             <div className="border border-gray-300 p-2 rounded-lg">
                 <div className="flex justify-between">
                     <label htmlFor="polyline">Polyline</label>

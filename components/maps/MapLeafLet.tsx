@@ -32,34 +32,41 @@ L.TileLayer.prototype.options.minZoom = minZoom;
 
 const MapLeafLet = () => {
     const [mounted, setMounted] = useState(false);
-    const { rosPublish, dataSTM32 } = useRosContext();
+    const { rosPublish, stm32_listener } = useRosContext();
     const [coordinates, setCoordinates] = useState<number[][]>([]);
-    const [pointsSentToJetson, setPointsSentToJetson] = useState<number[][]>([]);
+    const [pointsSentToJetson, setPointsSentToJetson] = useState<number[][]>(
+        []
+    );
     const [coordinatesSaved, setCoordinatesSaved] = useState<number[][]>([]);
-
 
     // data stm32: s:2:2:lat:lng:e
     useEffect(() => {
         setMounted(true);
+        if (!stm32_listener) return;
+    
+        const callback = (message: any) => {
+           const [_, mode, ___, lat, lng] = message.data.split(":");
+           // Convert to coords map
+           const latOnMap = convertToCoordsMap(parseFloat(lat));
+           const lngOnMap = convertToCoordsMap(parseFloat(lng));
+           // Mode GPS = 2
+           if (mode !== "2") return;
 
-        if (dataSTM32) {
-            const [_, mode, ___, lat, lng] = dataSTM32.split(":");
-
-            // Convert to coords map
-            const latOnMap = convertToCoordsMap(parseFloat(lat));
-            const lngOnMap = convertToCoordsMap(parseFloat(lng));
-            console.log("MODE::: ", mode);
-            // Mode GPS = 2
-            if (mode !== "2") return;
-
-            setCoordinates((prev) => [...prev, [latOnMap, lngOnMap]]);
-        }
-    }, [dataSTM32]);
+           setCoordinates((prev) => [...prev, [latOnMap, lngOnMap]]);
+        };
+    
+        stm32_listener.subscribe(callback);
+    
+        return () => {
+            stm32_listener.unsubscribe(callback);
+        };
+    }, [stm32_listener]);
 
     const sendPointsToJetson = () => {
         console.log(`pointsSentToJetson sent`);
 
-        const pointsSent = coordinatesSaved.length > 0 ? coordinatesSaved : pointsSentToJetson;
+        const pointsSent =
+            coordinatesSaved.length > 0 ? coordinatesSaved : pointsSentToJetson;
 
         const message = new ROSLIB.Message({
             data: `[standley_node] ${pointsSent.length}-${pointsSent}`,
@@ -140,7 +147,7 @@ const MapLeafLet = () => {
     if (!mounted) return <p>Loading map...</p>;
 
     return (
-        <div className="h-[450px] w-full">
+        <div className="h-[414px] w-full">
             <MapContainer
                 center={[10.882130166666665, 106.80544716666667]}
                 zoom={15}
@@ -172,14 +179,12 @@ const MapLeafLet = () => {
                         positions={coordinates as LatLngExpression[]}
                     />
                 )}
-                {
-                    coordinatesSaved.length > 1 && (
-                        <Polyline
-                            pathOptions={{ color: "black" }}
-                            positions={coordinatesSaved as LatLngExpression[]}
-                        />
-                    )
-                }
+                {coordinatesSaved.length > 1 && (
+                    <Polyline
+                        pathOptions={{ color: "black" }}
+                        positions={coordinatesSaved as LatLngExpression[]}
+                    />
+                )}
                 <button
                     onClick={sendPointsToJetson}
                     style={{
@@ -192,7 +197,10 @@ const MapLeafLet = () => {
                 >
                     Start
                 </button>
-                <SavePointsMap points={pointsSentToJetson} onSetCoordinatesSaved={setCoordinatesSaved} />
+                <SavePointsMap
+                    points={pointsSentToJetson}
+                    onSetCoordinatesSaved={setCoordinatesSaved}
+                />
             </MapContainer>
         </div>
     );

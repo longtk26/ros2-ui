@@ -3,9 +3,12 @@ import ROSLIB, { Message, Ros, Topic } from "roslib";
 
 const useRosbridge = (url: string) => {
     const [connected, setConnected] = useState<boolean>(false);
-    const [detectedImage, setDetectedImage] = useState<string>("");
-    const [dataSTM32, setDataSTMM32] = useState<string>("");
     const [rosPublish, setRosPublish] = useState<Topic<Message>>();
+
+    // Listeners
+    const [image_listener, setImageListener] = useState<Topic<Message>>();
+    const [stm32_listener, setStm32Listener] = useState<Topic<Message>>();
+    const [graph_listener, setGraphListener] = useState<Topic<Message>>();
 
     const ros = useMemo(() => new Ros({ url }), [url]);
 
@@ -25,12 +28,6 @@ const useRosbridge = (url: string) => {
             setConnected(false);
         });
 
-        return () => {
-            ros.close();
-        };
-    }, [ros]);
-
-    useEffect(() => {
         const image_listener = new ROSLIB.Topic({
             ros: ros,
             name: "/detection_image",
@@ -43,6 +40,12 @@ const useRosbridge = (url: string) => {
             messageType: "std_msgs/String",
         });
 
+        const graph_listener = new ROSLIB.Topic({
+            ros: ros,
+            name: "/standley_output",
+            messageType: "std_msgs/String",
+        });
+
         const publisher = new ROSLIB.Topic({
             ros: ros,
             name: "/ui_control",
@@ -50,24 +53,20 @@ const useRosbridge = (url: string) => {
         });
 
         setRosPublish(publisher);
-        
-
-        image_listener.subscribe((message: any) => {
-            // Change the detected image to base64
-            setDetectedImage(message.data);
-        });
-
-        stm32_listener.subscribe((message: any) => {
-            setDataSTMM32(message.data);
-        });
+        setImageListener(image_listener);
+        setStm32Listener(stm32_listener);
+        setGraphListener(graph_listener);
 
         return () => {
-            image_listener.unsubscribe();
+            ros.close();
             stm32_listener.unsubscribe();
+            image_listener.unsubscribe();
+            graph_listener.unsubscribe();
         };
     }, [ros]);
 
-    return { connected, detectedImage, dataSTM32, rosPublish };
+
+    return { connected, rosPublish, image_listener, stm32_listener, graph_listener };
 };
 
 export default useRosbridge;

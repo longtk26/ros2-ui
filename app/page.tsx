@@ -3,10 +3,12 @@
 import { Button } from "@/components/ui/button";
 import { useRosContext } from "@/contexts/useRosContext";
 import Image from "next/image";
+import { useEffect, useState } from "react";
 import ROSLIB from "roslib";
 
 export default function Home() {
-    const { detectedImage, rosPublish, dataSTM32 } = useRosContext();
+    const { image_listener, rosPublish, stm32_listener } = useRosContext();
+    const [detectedImage, setDetectedImage] = useState<string | null>(null);
     const handleOnclick = () => {
         const message = new ROSLIB.Message({ data: "start_follow" });
         rosPublish?.publish(message);
@@ -15,6 +17,24 @@ export default function Home() {
         const message = new ROSLIB.Message({ data: "stop_follow" });
         rosPublish?.publish(message);
     };
+
+    useEffect(() => {
+        if (!stm32_listener || !image_listener) return;
+
+        stm32_listener?.subscribe((message: any) => {
+            setDetectedImage(message.data);
+        });
+
+        image_listener?.subscribe((message: any) => {
+            setDetectedImage(message.data);
+        });
+
+        return () => {
+            stm32_listener?.unsubscribe();
+            image_listener?.unsubscribe();
+        };
+
+    }, [stm32_listener, image_listener]);
 
     const srcImage = detectedImage
         ? `data:image/jpeg;base64,${detectedImage}`
@@ -39,10 +59,6 @@ export default function Home() {
                 <Button className="mt-6" onClick={() => handleStop()}>
                     STOP
                 </Button>
-            </section>
-            <section className="mt-6">
-                <h1 className="text-2xl font-bold">Data from STM32:</h1>
-                <p>{dataSTM32}</p>
             </section>
         </main>
     );

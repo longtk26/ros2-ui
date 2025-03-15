@@ -13,70 +13,103 @@ import {
     ChartTooltip,
     ChartTooltipContent,
 } from "@/components/ui/chart";
-const chartDataActual = [
-    { x: 4, y: 186 },
-    { x: 3, y: 200 },
-    { x: 5, y: 237 },
-    { x: 6, y: 73 },
-    { x: 7, y: 209 },
-    { x: 8, y: 214 },
-];
-
-const chartDataCurrent = [
-    {actual: 3, current: 186},
-];
+import { useRosContext } from "@/contexts/useRosContext";
+import { useEffect, useState } from "react";
 
 const chartConfig = {
-    actual: {
-        label: "Actual",
+    set: {
+        label: "Set",
         color: "hsl(var(--chart-1))",
     },
-    current: {
-        label: "Current",
+    real: {
+        label: "Real",
         color: "hsl(var(--chart-2))",
     },
 } satisfies ChartConfig;
 
 export function LineChartRos() {
+    const { graph_listener } = useRosContext();
+    const [chartData, setChartData] = useState<{ set: number; real: number }[]>([]);
+
+    useEffect(() => {
+        if (!graph_listener) return;
+    
+        const callback = (message: any) => {
+            const dataGraphArray = message.data.split(":");
+            const isFromStandley = dataGraphArray[1] === "6";
+            if (!isFromStandley) return;
+            
+            const set = parseFloat(dataGraphArray[2]);  
+            const real = parseFloat(dataGraphArray[3]);
+
+            setChartData((prev) => [...prev, { set, real }]);
+        };
+    
+        graph_listener.subscribe(callback);
+    
+        return () => {
+            graph_listener.unsubscribe(callback);
+        };
+    }, [graph_listener]);
+
+
     return (
-        <section className="w-[300px] mt-2">
-            <Card>
-                <CardHeader>
-                </CardHeader>
+        <section className="mt-2 w-full">
+            <Card className="max-w-[700px] h-[250px]">
                 <CardContent>
                     <ChartContainer config={chartConfig}>
                         <LineChart
+                            width={20}
+                            height={10}
                             accessibilityLayer
-                            data={chartDataActual}
-                            margin={{
-                                left: 12,
-                                right: 12,
-                            }}
+                            data={chartData}
+                            margin={{ top: 30, left: 5, bottom: 150 }}
                         >
-                            <CartesianGrid vertical={false} />
+                            <CartesianGrid />
                             <XAxis
-                                dataKey="x"
                                 tickLine={false}
                                 axisLine={false}
                                 tickMargin={8}
+                                label={{ 
+                                    value: 'Time (s)', 
+                                    angle: 0, 
+                                    position: 'bottom', 
+                                    style: { textAnchor: 'middle' } 
+                                }}
                             />
                             <YAxis 
                                 tickLine={false}
                                 axisLine={false}
                                 tickMargin={8}
+                                domain={[-4, 4]}
+                                allowDataOverflow={true}
+                                label={{ 
+                                    value: 'Steering angle (rad)', 
+                                    angle: -90, 
+                                    position: 'insideLeft', 
+                                    style: { textAnchor: 'middle' } 
+                                }} 
                             />
                             <ChartTooltip
                                 cursor={false}
                                 content={<ChartTooltipContent hideLabel />}
                             />
                             <Line
-                                dataKey="actual"
+                                dataKey="set"
                                 type="natural"
-                                stroke="var(--color-actual)"
-                                strokeWidth={2}
-                                dot={{
-                                    fill: "var(--color-actual)",
+                                stroke="var(--color-set)"
+                                strokeWidth={1}
+                                dot={false}
+                                activeDot={{
+                                    r: 2,
                                 }}
+                            />
+                            <Line
+                                dataKey="real"
+                                type="natural"
+                                stroke="var(--color-real)"
+                                strokeWidth={1}
+                                dot={false}
                                 activeDot={{
                                     r: 6,
                                 }}

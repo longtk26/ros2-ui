@@ -19,7 +19,8 @@ L.Marker.prototype.options.icon = DefaultIcon;
 const LocationMaker = () => {
     const [position, setPosition] = useState<L.LatLng | null>(null);
     const [pathDebug, setPathDebug] = useState<L.LatLngTuple[]>([]); // Store path coordinates
-    const { dataSTM32, rosPublish } = useRosContext(); // STM32 data: s:3:2:lat:long:e
+    const { stm32_listener, rosPublish } = useRosContext(); // STM32 data: s:3:2:lat:long:e
+    const [dataSTM32, setDataSTM32] = useState<string>("");
     const map = useMapEvents({});
 
     const flyToFixedLocation = () => {
@@ -30,13 +31,16 @@ const LocationMaker = () => {
         console.log(lat, long);
 
         const fixedCoordinates = [lat, long] as L.LatLngTuple;
-        // setPosition(new L.LatLng(...fixedCoordinates));
-        setPosition(new L.LatLng(10.881989833333334, 106.80560283333334));
-        // map.flyTo(fixedCoordinates, 20);
-        map.flyTo([10.881989833333334, 106.80560283333334], 30);
+        setPosition(new L.LatLng(...fixedCoordinates));
+        // setPosition(new L.LatLng(10.881989833333334, 106.80560283333334));
+        map.flyTo(fixedCoordinates, 20);
+        // map.flyTo([10.881989833333334, 106.80560283333334], 30);
     };
 
     useEffect(() => {
+        stm32_listener?.subscribe((message: any) => {
+            setDataSTM32(message.data);
+        });
         const message = new ROSLIB.Message({
             data: "[serial] find-me",
         });

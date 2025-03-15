@@ -1,6 +1,7 @@
 export type RosContextType = {
     connected: boolean;
-    detectedImage: string;
     rosPublish: any;
-    dataSTM32: string;
+    image_listener: any;
+    stm32_listener: any;
+    graph_listener: any;
 }
