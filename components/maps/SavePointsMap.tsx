@@ -20,17 +20,17 @@ const SavePointsMap = ({ points, onSetCoordinatesSaved }: { points: number[][], 
         const typeSelected = e.target.querySelector("input:checked")?.id;
         const action = (e.nativeEvent as SubmitEvent).submitter?.getAttribute("name");
 
-        if (!typeSelected) {
-            alert("Please select a type (Polyline, Rectangle, Circle).");
-            return;
-        }
-
         console.log(`Action: ${action}`);
-        console.log(`Type selected: ${typeSelected}`);
-
         const filename = `${typeSelected}.txt`;
 
         if (action === "save") {
+            if (!typeSelected) {
+                alert("Please select a type (Polyline, Rectangle, Circle).");
+                return;
+            }
+            console.log(`Type selected: ${typeSelected}`);
+
+
             if (points.length === 0) {
                 alert("No points to save.");
                 return;

@@ -3,6 +3,18 @@
 import { useRosContext } from "@/contexts/useRosContext";
 import { LineChartRos } from "../charts/LineChart";
 import { useEffect, useState } from "react";
+import { Button } from "../ui/button";
+
+const ListTabs = [
+    {
+        id: "x_graph",
+        name: "Tab1",
+    },
+    {
+        id: "y_graph",
+        name: "Tab2",
+    },
+];
 
 const MapCrossTrack = () => {
     const { graph_listener } = useRosContext();
@@ -12,6 +24,10 @@ const MapCrossTrack = () => {
     const [IMUAngle, setIMUAngle] = useState(0);
     const [headingRef, setHeadingRef] = useState(0);
     const [thetaD, setThetaD] = useState(0);
+    const [closestX, setClosestX] = useState(0);
+    const [closestY, setClosestY] = useState(0);
+
+    const [activeTab, setActiveTab] = useState("x_graph");
 
     useEffect(() => {
         if (!graph_listener) return;
@@ -21,6 +37,8 @@ const MapCrossTrack = () => {
             const isFromStandley = dataGraphArray[1] === "5";
             if (!isFromStandley) return;
             
+            setClosestY(parseFloat(dataGraphArray[9]))
+            setClosestX(parseFloat(dataGraphArray[8]))
             setThetaD(parseFloat(dataGraphArray[7]));
             setHeadingRef(parseFloat(dataGraphArray[6]));
             setIMUAngle(parseFloat(dataGraphArray[5]));
@@ -39,8 +57,23 @@ const MapCrossTrack = () => {
 
     return (
         <section className="flex justify-between items-center">
-            <LineChartRos />
-            <div className="bg-white p-2 rounded-lg text-sm mr-12 h-[80%] w-[30%]">
+            <div className="w-full relative">
+                <div className="flex flex-col items-center gap-2 absolute right-[100px] text-[12px] top-[50%] transform translate-y-[-50%]">
+                    {
+                        ListTabs.map((tab) => (
+                            <Button 
+                                key={tab.id} 
+                                className={`text-[12px] p-2 bg-white text-gray-400 hover:bg-black/10 hover:text-white ${activeTab === tab.id ? 'bg-black/10 text-black' : ''}`}
+                                onClick={() => setActiveTab(tab.id)}
+                            >
+                                {tab.name}
+                            </Button>
+                        ))
+                    }
+                </div>
+                <LineChartRos type={activeTab} />
+            </div>
+            <div className="bg-white p-2 rounded-lg text-sm mr-12 h-[80%] w-[48%]">
                 <p className="font-bold">
                     Distance to closest point:
                     <span className="font-normal">
@@ -81,6 +114,20 @@ const MapCrossTrack = () => {
                     <span className="font-normal">
                         {" "}
                         {thetaD} {"(rad)"}
+                    </span>
+                </p>
+                <p className="font-bold">
+                    ThetaX:
+                    <span className="font-normal">
+                        {" "}
+                        {closestX} {"(m)"}
+                    </span>
+                </p>
+                <p className="font-bold">
+                    ThetaY:
+                    <span className="font-normal">
+                        {" "}
+                        {closestY} {"(m)"}
                     </span>
                 </p>
             </div>

@@ -14,7 +14,7 @@ const RosProvider = ({ children }: { children: React.ReactElement }) => {
         image_listener,
         stm32_listener,
         graph_listener,
-    } = useRosbridge("ws://localhost:9091");
+    } = useRosbridge("ws://192.168.165.171:9091");
 
     return (
         <RosContext.Provider

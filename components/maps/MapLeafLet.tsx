@@ -12,7 +12,7 @@ import { EditControl } from "react-leaflet-draw";
 import L, { LatLngExpression, point } from "leaflet";
 import { useRosContext } from "@/contexts/useRosContext";
 import ROSLIB from "roslib";
-import { convertToCoordsMap, interpolatePoints } from "@/util";
+import { convertToCoordsMap, interpolateBezier, interpolateCurve, interpolatePoints, resamplePoints } from "@/util";
 import SavePointsMap from "./SavePointsMap";
 
 const MapContainer = dynamic(
@@ -112,36 +112,85 @@ const MapLeafLet = () => {
             );
         }
 
-        setPointsSentToJetson(points);
+        console.log(`Rectangle points:`,
+            points.length
+        );
+        setPointsSentToJetson(prev => [...prev, ...points]);
     };
+
+    // const handlePolyline = (e: any) => {
+    //     const listCoordinates = e.layer._latlngs.map((item: any) => [
+    //         item.lat,
+    //         item.lng,
+    //     ]);
+
+    //     const points: number[][] = [];
+    //     const distanceBetweenCoords = 0.5 / 111320;
+    //     for (let i = 0; i < listCoordinates.length - 1; i++) {
+    //         points.push(
+    //             ...interpolatePoints(
+    //                 listCoordinates[i],
+    //                 listCoordinates[i + 1],
+    //                 distanceBetweenCoords
+    //             )
+    //         );
+    //     }
+    //     console.log(`Polyline points:`, points.length);
+    //     setPointsSentToJetson(prev => [...points, ...prev]);
+    // };
 
     const handlePolyline = (e: any) => {
-        const listCoordinates = e.layer._latlngs.map((item: any) => [
-            item.lat,
-            item.lng,
-        ]);
-
+        const listCoordinates = e.layer._latlngs.map((item: any) => [item.lat, item.lng]);
         const points: number[][] = [];
-        const distanceBetweenCoords = 0.5 / 111320;
-        for (let i = 0; i < listCoordinates.length - 1; i++) {
-            points.push(
-                ...interpolatePoints(
-                    listCoordinates[i],
-                    listCoordinates[i + 1],
-                    distanceBetweenCoords
-                )
-            );
-        }
+        const step = 0.5 / 111320; // 0.5m chuyển đổi sang đơn vị độ
 
-        setPointsSentToJetson(points);
+        if (listCoordinates.length < 3) {
+            for (let i = 0; i < listCoordinates.length - 1; i++) {
+                points.push(
+                    ...interpolatePoints(
+                        listCoordinates[i],
+                        listCoordinates[i + 1],
+                        step
+                    )
+                );
+            }
+
+
+            setPointsSentToJetson(prev => [...prev, ...listCoordinates]);
+            console.log(`Polyline points:`, points.length);
+            return;
+        }
+        const curvePoints = interpolateCurve(listCoordinates, 50);
+    
+        points.push(...resamplePoints(curvePoints, 0.5));
+    
+        console.log(`Smoothed Polyline points:`, points.length);
+        setPointsSentToJetson(prev => [...points, ...prev]);
     };
+    
 
     const handleCircle = (e: any) => {
-        console.log(`circle:`, e);
-    };
-
-    const handleEdit = (e: any) => {
-        console.log(`edited:`, e.target._targets);
+        const center = e.layer._latlng;
+        const radius = e.layer._mRadius; 
+        const distanceBetweenCoords = 0.25; 
+    
+        
+        const circumference = 2 * Math.PI * radius;
+        const numPoints = Math.ceil(circumference / distanceBetweenCoords); 
+    
+        const points: number[][] = [];
+        for (let i = 0; i <= numPoints; i++) { 
+            const angle = (i / numPoints) * 2 * Math.PI;
+            const latOffset = (radius / 111320) * Math.cos(angle);
+            const lngOffset = (radius / (111320 * Math.cos(center.lat * Math.PI / 180))) * Math.sin(angle);
+    
+            const lat = center.lat + latOffset;
+            const lng = center.lng + lngOffset;
+            points.push([lat, lng]);
+        }
+    
+        console.log(`Circle points:`, points.length);
+        setPointsSentToJetson(prev => [...prev, ...points]);
     };
 
     if (!mounted) return <p>Loading map...</p>;
@@ -158,7 +207,6 @@ const MapLeafLet = () => {
                     <EditControl
                         position="topright"
                         onCreated={sendCoordinates}
-                        onEdited={handleEdit}
                         draw={{
                             rectangle: true,
                             circle: true,
