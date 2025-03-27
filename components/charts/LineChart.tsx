@@ -105,7 +105,7 @@ export function LineChartRos({ type="x_graph" }: { type: string }) {
                                 tickLine={false}
                                 axisLine={false}
                                 tickMargin={8}
-                                domain={[-1, 1]}
+                                domain={[-2, 2]}
                                 allowDataOverflow={true}
                                 label={{
                                     value: label,

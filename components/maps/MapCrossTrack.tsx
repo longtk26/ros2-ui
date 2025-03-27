@@ -117,14 +117,14 @@ const MapCrossTrack = () => {
                     </span>
                 </p>
                 <p className="font-bold">
-                    ThetaX:
+                    ClosestX:
                     <span className="font-normal">
                         {" "}
                         {closestX} {"(m)"}
                     </span>
                 </p>
                 <p className="font-bold">
-                    ThetaY:
+                    ClosestY:
                     <span className="font-normal">
                         {" "}
                         {closestY} {"(m)"}

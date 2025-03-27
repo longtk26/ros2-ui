@@ -21,9 +21,9 @@ export default function Home() {
     useEffect(() => {
         if (!stm32_listener || !image_listener) return;
 
-        stm32_listener?.subscribe((message: any) => {
-            setDetectedImage(message.data);
-        });
+        // stm32_listener?.subscribe((message: any) => {
+        //     setDetectedImage(message.data);
+        // });
 
         image_listener?.subscribe((message: any) => {
             setDetectedImage(message.data);
