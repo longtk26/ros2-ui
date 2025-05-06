@@ -131,7 +131,7 @@ const MapLeafLet = () => {
         const step = 0.5 / 111320; // 0.5m chuyển đổi sang đơn vị độ
 
         if (listCoordinates.length < 3) {
-            for (let i = 0; i < listCoordinates.length; i++) {
+            for (let i = 0; i < listCoordinates.length - 1; i++) {
                 points.push(
                     ...interpolatePoints(
                         listCoordinates[i],
@@ -141,7 +141,7 @@ const MapLeafLet = () => {
                 );
             }
 
-            setPointsSentToJetson((prev) => [...prev, ...listCoordinates]);
+            setPointsSentToJetson((prev) => [...prev, ...points]);
             console.log(`Polyline points:`, points.length);
             return;
         }

@@ -76,11 +76,11 @@ const MapCrossTrack = () => {
                         </Button>
                     ))}
                 </div>
-                {/* <LineChartRos
+                <LineChartRos
                     type={
                         activeTab as "x_graph" | "y_graph" | "cross_track_graph"
                     }
-                /> */}
+                />
             </div>
             <div className="bg-white p-2 rounded-lg text-sm mr-12 h-[80%] w-[48%]">
                 <p className="font-bold">
